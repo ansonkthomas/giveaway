@@ -13,10 +13,11 @@ use Symfony\Component\HttpFoundation\Request;
 class ProductController extends ApiController
 {
     /**
+     * Create a product
+     *
      * @Route("/api/product/create", name="create_product", methods={"POST"})
      */
-    public function createProduct(Request $request)
-    {
+    public function createProduct(Request $request) {
         $entityManager = $this->getDoctrine()->getManager();
         try {
             $request = UtilityController::transformJsonBody($request);
@@ -43,11 +44,12 @@ class ProductController extends ApiController
         return $this->respondNotFound("The route does not exists");
     }
 
-    /**
-   * @Route("/api/product/{id}", name = "show_product", requirements={"number"="\d+"})
-   */
-   public function showProduct(int $id)
-   {
+   /**
+    * Get the product details
+    *
+    * @Route("/api/product/{id}", name = "show_product", requirements={"number"="\d+"})
+    */
+   public function showProduct(int $id) {
       $entityManager = $this->getDoctrine()->getManager();
       try {
           $product = $entityManager->getRepository(Product::class)->find($id);
@@ -66,10 +68,11 @@ class ProductController extends ApiController
    }
 
    /**
-   * @Route("/api/product/update/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"POST"})
-   */
-   public function updateProduct(Request $request, int $id)
-   {
+    * Update the product details
+    *
+    * @Route("/api/product/update/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"POST"})
+    */
+   public function updateProduct(Request $request, int $id) {
        $entityManager = $this->getDoctrine()->getManager();
        $request = UtilityController::transformJsonBody($request);
        try {
@@ -100,8 +103,10 @@ class ProductController extends ApiController
    }
 
    /**
-   * @Route("/api/product/delete/{id}", name = "delete_product", requirements={"number"="\d+"}, methods = {"DELETE"})
-   */
+    * Delete a product
+    *
+    * @Route("/api/product/delete/{id}", name = "delete_product", requirements={"number"="\d+"}, methods = {"DELETE"})
+    */
    public function deleteProduct(int $id) {
        $entityManager = $this->getDoctrine()->getManager();
        try {

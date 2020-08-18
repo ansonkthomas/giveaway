@@ -15,6 +15,9 @@ namespace App\Controller;
 
  class AuthController extends ApiController {
 
+  /**
+   * Register a user
+   */
   public function register(Request $request, UserPasswordEncoderInterface $encoder) {
      $em = $this->getDoctrine()->getManager();
      $request = UtilityController::transformJsonBody($request);
@@ -40,12 +43,13 @@ namespace App\Controller;
   }
 
   /**
+   * JWT login authentication for users
+   *
    * @param UserInterface $user
    * @param JWTTokenManagerInterface $JWTManager
    * @return JsonResponse
    */
-  public function getTokenUser(UserInterface $user, JWTTokenManagerInterface $JWTManager)
-  {
+  public function getTokenUser(UserInterface $user, JWTTokenManagerInterface $JWTManager) {
     return new JsonResponse(['token' => $JWTManager->create($user)]);
   }
 
