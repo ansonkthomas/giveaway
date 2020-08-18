@@ -17,7 +17,7 @@ namespace App\Controller;
 
   public function register(Request $request, UserPasswordEncoderInterface $encoder) {
      $em = $this->getDoctrine()->getManager();
-     $request = $this->transformJsonBody($request);
+     $request = UtilityController::transformJsonBody($request);
      $username = $request->get('username');
      $password = $request->get('password');
 
