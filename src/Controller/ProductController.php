@@ -9,13 +9,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
-
-
-
-
 
 class ProductController extends ApiController
 {
@@ -26,7 +19,7 @@ class ProductController extends ApiController
     {
         $entityManager = $this->getDoctrine()->getManager();
         try {
-            $request = $this->transformJsonBody($request);
+            $request = UtilityController::transformJsonBody($request);
             if(!$request || empty($request->get("name")) || empty($request->get("type"))) {
                 throw new \Exception;
             }
@@ -36,11 +29,7 @@ class ProductController extends ApiController
             $product->setType($request->get("type"));
             $entityManager->persist($product);
             $entityManager->flush();
-
-            $encoders = [new JsonEncoder()];
-            $normalizers = [new ObjectNormalizer()];
-            $serializer = new Serializer($normalizers, $encoders);
-            $data = $serializer->serialize($product, 'json');
+            $data = UtilityController::objectToJsonSerializer($product);
         } catch (\Exception $e) {
             $data = [
               "status" => 422,
@@ -65,16 +54,15 @@ class ProductController extends ApiController
           if (!$product) {
               throw new \Exception;
           }
+          $data = UtilityController::objectToJsonSerializer($product);
       } catch (\Exception $e) {
-          return $this->respondNotFound("The product does not found");
+          $data = [
+            "status" => 404,
+            "error" => "The product does not found"
+          ];
       }
 
-      $encoders = [new JsonEncoder()];
-      $normalizers = [new ObjectNormalizer()];
-      $serializer = new Serializer($normalizers, $encoders);
-      $jsonContent = $serializer->serialize($product, 'json');
-
-      return $this->response($jsonContent);
+      return $this->response($data);
    }
 
    /**
@@ -83,7 +71,7 @@ class ProductController extends ApiController
    public function updateProduct(Request $request, int $id)
    {
        $entityManager = $this->getDoctrine()->getManager();
-       $request = $this->transformJsonBody($request);
+       $request = UtilityController::transformJsonBody($request);
        try {
            $product = $entityManager->getRepository(Product::class)->find($id);
            if (!$product) {
