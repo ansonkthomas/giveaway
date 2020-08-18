@@ -40,10 +40,6 @@ class ProductController extends ApiController
         return $this->response($data);
     }
 
-    public function show() {
-        return $this->respondNotFound("The route does not exists");
-    }
-
    /**
     * Get the product details
     *

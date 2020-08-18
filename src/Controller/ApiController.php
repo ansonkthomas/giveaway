@@ -136,4 +136,8 @@ namespace App\Controller;
    return $this->setStatusCode(201)->response($data);
   }
 
+  public function invalidUrl() {
+      return $this->respondNotFound("The route does not exists");
+  }
+
  }

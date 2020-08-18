@@ -16,4 +16,4 @@ framework:
         log: true
 
     error_controller:
-      App\Controller\ProductController::show    
+      App\Controller\ApiController::invalidUrl    
