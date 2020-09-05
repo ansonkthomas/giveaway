@@ -15,7 +15,7 @@ class ProductController extends ApiController
     /**
      * Create a product
      *
-     * @Route("/api/product/create", name="create_product", methods={"POST"})
+     * @Route("/products", name="create_product", methods={"POST"})
      */
     public function createProduct(Request $request) {
         $entityManager = $this->getDoctrine()->getManager();
@@ -44,7 +44,7 @@ class ProductController extends ApiController
     /**
      * Get the product details
      *
-     * @Route("/api/product/{id}", name = "show_product", requirements={"number"="\d+"})
+     * @Route("/products/{id}", name = "show_product", requirements={"number"="\d+"}, methods={"GET"})
      */
     public function showProduct(int $id) {
         $entityManager = $this->getDoctrine()->getManager();
@@ -67,7 +67,7 @@ class ProductController extends ApiController
     /**
      * Update the product details
      *
-     * @Route("/api/product/update/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"POST"})
+     * @Route("/products/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"PUT"})
      */
     public function updateProduct(Request $request, int $id) {
         $entityManager = $this->getDoctrine()->getManager();
@@ -103,7 +103,7 @@ class ProductController extends ApiController
     /**
      * Delete a product
      *
-     * @Route("/api/product/delete/{id}", name = "delete_product", requirements={"number"="\d+"}, methods = {"DELETE"})
+     * @Route("/products/{id}", name = "delete_product", requirements={"number"="\d+"}, methods = {"DELETE"})
      */
     public function deleteProduct(int $id) {
         $entityManager = $this->getDoctrine()->getManager();
