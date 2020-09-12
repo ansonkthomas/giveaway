@@ -16,30 +16,48 @@ class AuthController extends ApiController
 {
     /**
      * Register a user
+     *
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $encoder
      */
     public function register(Request $request, UserPasswordEncoderInterface $encoder) {
-        $em = $this->getDoctrine()->getManager();
+        $entityManager = $this->getDoctrine()->getManager();
         $request = UtilityController::transformJsonBody($request);
         $username = $request->get('username');
         $password = $request->get('password');
 
-        if (empty($username) || empty($password)) {
-            return $this->respondValidationError("Invalid Username or Password");
-        }
-
-        $user = new User($username);
-        $user->setPassword($encoder->encodePassword($user, $password));
-        $user->setUsername($username);
-        $user->setRoles(array("ROLE_USER"));
-
         try {
-            $em->persist($user);
-            $em->flush();
+            if(!$request) {
+                $this->throwBadRequest();
+            }
+            //Validate the user properties
+            $validate = $this->validateUser($request);
+            if (count($validate)) {
+                $this->throwValidation($validate);
+            }
+
+            //Create an instance of User entity
+            $user = new User($username);
+            $user->setPassword($encoder->encodePassword($user, $password));
+            $user->setUsername($username);
+            $user->setRoles(array("ROLE_USER"));
+            try {
+                $entityManager->persist($user);
+                $entityManager->flush();
+            } catch (\Exception $e) {
+                throw new \Exception("The username exists");
+            }
+            
+            //Reset the value of password
+            $user->setPassword("");
+            $data = UtilityController::objectToJsonSerializer($user);
         } catch (\Exception $e) {
-            return $this->respondValidationError("The username exists");
+            $data = [
+                "message" => $e->getMessage()
+            ];
         }
 
-        return $this->respondWithSuccess(sprintf('User %s successfully created', $user->getUsername()));
+        return $this->response($data);
     }
 
     /**
@@ -47,9 +65,29 @@ class AuthController extends ApiController
      *
      * @param UserInterface $user
      * @param JWTTokenManagerInterface $JWTManager
+     *
      * @return JsonResponse
      */
     public function getTokenUser(UserInterface $user, JWTTokenManagerInterface $JWTManager) {
         return new JsonResponse(['token' => $JWTManager->create($user)]);
+    }
+
+    /**
+     * Validate user parameters
+     *
+     * @param array $request
+
+     * @return array $validate
+     */
+    private function validateUser($request) {
+        $validate = array();
+        if (empty($request->get("username"))) {
+            array_push($validate, array("username" => "A user name is required"));
+        }
+        if (empty($request->get("password"))) {
+            array_push($validate, array("password" => "A password is required"));
+        }
+
+        return $validate;
     }
 }

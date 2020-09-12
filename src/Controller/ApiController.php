@@ -41,90 +41,58 @@ class ApiController extends AbstractController
      *
      * @param array $data
      * @param array $headers
-     *
+
      * @return JsonResponse
      */
     public function response($data, $headers = []) {
-        return new JsonResponse($data, $this->getStatusCode(), $headers);
-    }
-
-    /**
-     * Sets an error message and returns a JSON response
-     *
-     * @param string $errors
-     * @param $headers
-     * @return JsonResponse
-     */
-    public function respondWithErrors($errors, $headers = []) {
-        $data = [
-            'status' => $this->getStatusCode(),
-            'errors' => $errors,
+        $status = ($this->getStatusCode() == 200) ? "success" : "fail";
+        $response = [
+            "status" => $status,
+            "data" => $data
         ];
-
-        return new JsonResponse($data, $this->getStatusCode(), $headers);
+        return new JsonResponse(json_encode($response), $this->getStatusCode(), $headers);
     }
 
     /**
-     * Sets an error message and returns a JSON response
+     * Throw an exception of validation
      *
-     * @param string $success
-     * @param $headers
-     * @return JsonResponse
+     * @param array $validate
+     * @throws Exception
      */
-    public function respondWithSuccess($success, $headers = []) {
-        $data = [
-            'status' => $this->getStatusCode(),
-            'success' => $success,
-        ];
-
-        return new JsonResponse($data, $this->getStatusCode(), $headers);
+    public function throwValidation($validate) {
+        $this->setStatusCode(422);
+        throw new \Exception(json_encode($validate));
     }
 
     /**
-     * Returns a 401 Unauthorized http response
+     * Throw an exception of bad request
      *
-     * @param string $message
-     *
-     * @return JsonResponse
+     * @throws Exception
      */
-    public function respondUnauthorized($message = 'Not authorized!') {
-        return $this->setStatusCode(401)->respondWithErrors($message);
+    public function throwBadRequest() {
+        $this->setStatusCode(400);
+        throw new \Exception("Does not find the request parameters");
     }
 
     /**
-     * Returns a 422 Unprocessable Entity
+     * Throw an exception of resource does not found
      *
-     * @param string $message
-     *
-     * @return JsonResponse
+     * @throws Exception
      */
-    public function respondValidationError($message = 'Validation errors') {
-        return $this->setStatusCode(422)->respondWithErrors($message);
+    public function throwResourceNotFound($message) {
+        $this->setStatusCode(404);
+        throw new \Exception($message);
     }
 
     /**
-     * Returns a 404 Not Found
-     *
-     * @param string $message
-     *
-     * @return JsonResponse
+     * 404 response in case of an invalid url. Method defined in framework.yaml
      */
-    public function respondNotFound($message = 'Not found!') {
-        return $this->setStatusCode(404)->respondWithErrors($message);
-    }
-
-    /**
-     * Returns a 201 Created
-     *
-     * @param array $data
-     *
-     * @return JsonResponse
-     */
-    public function respondCreated($data = []) {
-        return $this->setStatusCode(201)->response($data);
-    }
-
     public function invalidUrl() {
-        return $this->respondNotFound("The route does not exists");
+        $this->setStatusCode(404);
+        $data = [
+            "message" => "The route does not exists"
+        ];
+
+        return $this->response($data);
     }
 }

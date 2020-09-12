@@ -19,12 +19,18 @@ class ProductController extends ApiController
      */
     public function createProduct(Request $request) {
         $entityManager = $this->getDoctrine()->getManager();
+        $request = UtilityController::transformJsonBody($request);
         try {
-            $request = UtilityController::transformJsonBody($request);
-            if(!$request || empty($request->get("name")) || empty($request->get("type"))) {
-                throw new \Exception;
+            if(!$request) {
+                $this->throwBadRequest();
+            }
+            //Validate the product properties
+            $validate = $this->validateProduct($request);
+            if (count($validate)) {
+                $this->throwValidation($validate);
             }
 
+            //Create an instance of Product entity
             $product = new Product();
             $product->setName($request->get("name"));
             $product->setType($request->get("type"));
@@ -33,8 +39,7 @@ class ProductController extends ApiController
             $data = UtilityController::objectToJsonSerializer($product);
         } catch (\Exception $e) {
             $data = [
-                "status" => 422,
-                "error" => "Invalid parameters"
+                "message" => $e->getMessage()
             ];
         }
 
@@ -51,14 +56,13 @@ class ProductController extends ApiController
         try {
             $product = $entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
-                throw new \Exception;
+                $this->throwResourceNotFound("The product does not exists");
             }
             $data = UtilityController::objectToJsonSerializer($product);
         } catch (\Exception $e) {
-            $data = [
-                "status" => 404,
-                "error" => "The product does not found"
-            ];
+          $data = [
+              "message" => $e->getMessage()
+          ];
         }
 
         return $this->response($data);
@@ -73,27 +77,27 @@ class ProductController extends ApiController
         $entityManager = $this->getDoctrine()->getManager();
         $request = UtilityController::transformJsonBody($request);
         try {
+            if(!$request) {
+                $this->throwBadRequest();
+            }
             $product = $entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
-                return $this->respondNotFound("The product does not found");
+                $this->throwResourceNotFound("The product does not exists");
             }
 
-            if(empty($request->get("name")) || empty($request->get("type"))) {
-                throw new \Exception;
+            //Validate the product properties
+            $validate = $this->validateProduct($request);
+            if (count($validate)) {
+                $this->throwValidation($validate);
             }
 
             $product->setName($request->get("name"));
             $product->setType($request->get("type"));
             $entityManager->flush();
-
-            $data = [
-                "status" => 200,
-                "success" => "The product has been updated"
-            ];
+            $data = UtilityController::objectToJsonSerializer($product);
         } catch (\Exception $e) {
             $data = [
-                "status" => 422,
-                "error" => "Invalid parameters"
+                "message" => $e->getMessage()
             ];
         }
 
@@ -110,21 +114,38 @@ class ProductController extends ApiController
         try {
             $product = $entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
-               throw new \Exception();
+               $this->throwResourceNotFound("The product does not exists");
             }
             $entityManager->remove($product);
             $entityManager->flush();
             $data = [
-              "status" => 200,
-              "success" => "The product has been deleted"
+                "message" => "The product has been deleted"
             ];
         } catch (\Exception $e) {
             $data = [
-                "status" => 200,
-                "error" => "The product does not found"
+                "message" => $e->getMessage()
             ];
         }
 
         return $this->response($data);
+    }
+
+    /**
+     * Validate product parameters
+     *
+     * @param Request $request
+     *
+     * @return array $validate
+     */
+    private function validateProduct($request) {
+        $validate = array();
+        if (empty($request->get("name"))) {
+            array_push($validate, array("name" => "A product name is required"));
+        }
+        if (empty($request->get("type"))) {
+            array_push($validate, array("type" => "A product type is required"));
+        }
+
+        return $validate;
     }
 }
