@@ -50,7 +50,8 @@ class ApiController extends AbstractController
             "status" => $status,
             "data" => $data
         ];
-        return new JsonResponse(json_encode($response), $this->getStatusCode(), $headers);
+
+        return new JsonResponse($response, $this->getStatusCode(), $headers);
     }
 
     /**
@@ -59,9 +60,8 @@ class ApiController extends AbstractController
      * @param array $validate
      * @throws Exception
      */
-    public function throwValidation($validate) {
+    public function setValidationStatusCode() {
         $this->setStatusCode(422);
-        throw new \Exception(json_encode($validate));
     }
 
     /**
@@ -90,7 +90,7 @@ class ApiController extends AbstractController
     public function invalidUrl() {
         $this->setStatusCode(404);
         $data = [
-            "message" => "The route does not exists"
+            "message" => "The route does not exists or invalid request parameters"
         ];
 
         return $this->response($data);

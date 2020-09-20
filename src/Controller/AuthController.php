@@ -33,24 +33,28 @@ class AuthController extends ApiController
             //Validate the user properties
             $validate = $this->validateUser($request);
             if (count($validate)) {
-                $this->throwValidation($validate);
-            }
+                $this->setValidationStatusCode();
+                $data = [
+                    "message" => $validate
+                ];
+            } else {
+                //Create an instance of User entity
+                $user = new User($username);
+                $user->setPassword($encoder->encodePassword($user, $password));
+                $user->setUsername($username);
+                $user->setRoles(array("ROLE_USER"));
+                try {
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                } catch (\Exception $e) {
+                    $this->setValidationStatusCode();
+                    throw new \Exception("The username exists");
+                }
 
-            //Create an instance of User entity
-            $user = new User($username);
-            $user->setPassword($encoder->encodePassword($user, $password));
-            $user->setUsername($username);
-            $user->setRoles(array("ROLE_USER"));
-            try {
-                $entityManager->persist($user);
-                $entityManager->flush();
-            } catch (\Exception $e) {
-                throw new \Exception("The username exists");
+                //Reset the value of password
+                $user->setPassword("");
+                $data = UtilityController::objctToArrayNormalize($user);
             }
-            
-            //Reset the value of password
-            $user->setPassword("");
-            $data = UtilityController::objectToJsonSerializer($user);
         } catch (\Exception $e) {
             $data = [
                 "message" => $e->getMessage()
@@ -82,7 +86,7 @@ class AuthController extends ApiController
     private function validateUser($request) {
         $validate = array();
         if (empty($request->get("username"))) {
-            array_push($validate, array("username" => "A user name is required"));
+            array_push($validate, array("username" => "A username is required"));
         }
         if (empty($request->get("password"))) {
             array_push($validate, array("password" => "A password is required"));

@@ -27,16 +27,19 @@ class ProductController extends ApiController
             //Validate the product properties
             $validate = $this->validateProduct($request);
             if (count($validate)) {
-                $this->throwValidation($validate);
+                $this->setValidationStatusCode();
+                $data = [
+                    "message" => $validate
+                ];
+            } else {
+                //Create an instance of Product entity
+                $product = new Product();
+                $product->setName($request->get("name"));
+                $product->setType($request->get("type"));
+                $entityManager->persist($product);
+                $entityManager->flush();
+                $data = UtilityController::objctToArrayNormalize($product);
             }
-
-            //Create an instance of Product entity
-            $product = new Product();
-            $product->setName($request->get("name"));
-            $product->setType($request->get("type"));
-            $entityManager->persist($product);
-            $entityManager->flush();
-            $data = UtilityController::objectToJsonSerializer($product);
         } catch (\Exception $e) {
             $data = [
                 "message" => $e->getMessage()
@@ -58,11 +61,11 @@ class ProductController extends ApiController
             if (!$product) {
                 $this->throwResourceNotFound("The product does not exists");
             }
-            $data = UtilityController::objectToJsonSerializer($product);
+            $data = UtilityController::objctToArrayNormalize($product);
         } catch (\Exception $e) {
-          $data = [
-              "message" => $e->getMessage()
-          ];
+            $data = [
+                "message" => $e->getMessage()
+            ];
         }
 
         return $this->response($data);
@@ -88,13 +91,17 @@ class ProductController extends ApiController
             //Validate the product properties
             $validate = $this->validateProduct($request);
             if (count($validate)) {
-                $this->throwValidation($validate);
+                $this->setValidationStatusCode();
+                $data = [
+                    "message" => $validate
+                ];
+            } else {
+                //Update the product details
+                $product->setName($request->get("name"));
+                $product->setType($request->get("type"));
+                $entityManager->flush();
+                $data = UtilityController::objctToArrayNormalize($product);
             }
-
-            $product->setName($request->get("name"));
-            $product->setType($request->get("type"));
-            $entityManager->flush();
-            $data = UtilityController::objectToJsonSerializer($product);
         } catch (\Exception $e) {
             $data = [
                 "message" => $e->getMessage()
