@@ -17,11 +17,12 @@ class ProductController extends ApiController
      *
      * @Route("/products", name="create_product", methods={"POST"})
      */
-    public function createProduct(Request $request) {
+    public function createProduct(Request $request)
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $request = UtilityController::transformJsonBody($request);
         try {
-            if(!$request) {
+            if (!$request) {
                 $this->throwBadRequest();
             }
             //Validate the product properties
@@ -54,7 +55,8 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "show_product", requirements={"number"="\d+"}, methods={"GET"})
      */
-    public function showProduct(int $id) {
+    public function showProduct(int $id)
+    {
         $entityManager = $this->getDoctrine()->getManager();
         try {
             $product = $entityManager->getRepository(Product::class)->find($id);
@@ -76,11 +78,12 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"PUT"})
      */
-    public function updateProduct(Request $request, int $id) {
+    public function updateProduct(Request $request, int $id)
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $request = UtilityController::transformJsonBody($request);
         try {
-            if(!$request) {
+            if (!$request) {
                 $this->throwBadRequest();
             }
             $product = $entityManager->getRepository(Product::class)->find($id);
@@ -116,7 +119,8 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "delete_product", requirements={"number"="\d+"}, methods = {"DELETE"})
      */
-    public function deleteProduct(int $id) {
+    public function deleteProduct(int $id)
+    {
         $entityManager = $this->getDoctrine()->getManager();
         try {
             $product = $entityManager->getRepository(Product::class)->find($id);
@@ -144,7 +148,8 @@ class ProductController extends ApiController
      *
      * @return array $validate
      */
-    private function validateProduct($request) {
+    private function validateProduct($request)
+    {
         $validate = array();
         if (empty($request->get("name"))) {
             array_push($validate, array("name" => "A product name is required"));

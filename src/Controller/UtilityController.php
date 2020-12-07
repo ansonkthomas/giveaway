@@ -12,7 +12,8 @@ class UtilityController
     /**
      * Convert object to json
      */
-    public static function objectToJsonSerialize($object) {
+    public static function objectToJsonSerialize($object)
+    {
         $encoders = [new JsonEncoder()];
         $normalizers = [new ObjectNormalizer()];
         $serializer = new Serializer($normalizers, $encoders);
@@ -26,7 +27,8 @@ class UtilityController
      *
      * @return array $data
      */
-    public static function objctToArrayNormalize($object) {
+    public static function objctToArrayNormalize($object)
+    {
         $normalizers = [new ObjectNormalizer()];
         $serializer = new Serializer($normalizers);
         $data = $serializer->normalize($object);
@@ -34,13 +36,15 @@ class UtilityController
         return $data;
     }
 
-    public static function transformJsonBody(Request $request) {
+    public static function transformJsonBody(Request $request)
+    {
         $data = json_decode($request->getContent(), true);
 
         if ($data === null) {
             return $request;
         }
         $request->request->replace($data);
+
         return $request;
     }
 }

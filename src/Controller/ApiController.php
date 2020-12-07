@@ -19,7 +19,8 @@ class ApiController extends AbstractController
      *
      * @return integer
      */
-    public function getStatusCode() {
+    public function getStatusCode()
+    {
         return $this->statusCode;
     }
 
@@ -30,7 +31,8 @@ class ApiController extends AbstractController
      *
      * @return self
      */
-    protected function setStatusCode($statusCode) {
+    protected function setStatusCode($statusCode)
+    {
         $this->statusCode = $statusCode;
 
         return $this;
@@ -44,7 +46,8 @@ class ApiController extends AbstractController
 
      * @return JsonResponse
      */
-    public function response($data, $headers = []) {
+    public function response($data, $headers = [])
+    {
         $status = ($this->getStatusCode() == 200) ? "success" : "fail";
         $response = [
             "status" => $status,
@@ -60,7 +63,8 @@ class ApiController extends AbstractController
      * @param array $validate
      * @throws Exception
      */
-    public function setValidationStatusCode() {
+    public function setValidationStatusCode()
+    {
         $this->setStatusCode(422);
     }
 
@@ -69,7 +73,8 @@ class ApiController extends AbstractController
      *
      * @throws Exception
      */
-    public function throwBadRequest() {
+    public function throwBadRequest()
+    {
         $this->setStatusCode(400);
         throw new \Exception("Does not find the request parameters");
     }
@@ -79,7 +84,8 @@ class ApiController extends AbstractController
      *
      * @throws Exception
      */
-    public function throwResourceNotFound($message) {
+    public function throwResourceNotFound($message)
+    {
         $this->setStatusCode(404);
         throw new \Exception($message);
     }
@@ -87,7 +93,8 @@ class ApiController extends AbstractController
     /**
      * 404 response in case of an invalid url. Method defined in framework.yaml
      */
-    public function invalidUrl() {
+    public function invalidUrl()
+    {
         $this->setStatusCode(404);
         $data = [
             "message" => "The route does not exists or invalid request parameters"

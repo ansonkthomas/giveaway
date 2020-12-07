@@ -20,14 +20,15 @@ class AuthController extends ApiController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      */
-    public function register(Request $request, UserPasswordEncoderInterface $encoder) {
+    public function register(Request $request, UserPasswordEncoderInterface $encoder)
+    {
         $entityManager = $this->getDoctrine()->getManager();
         $request = UtilityController::transformJsonBody($request);
         $username = $request->get('username');
         $password = $request->get('password');
 
         try {
-            if(!$request) {
+            if (!$request) {
                 $this->throwBadRequest();
             }
             //Validate the user properties
@@ -72,8 +73,11 @@ class AuthController extends ApiController
      *
      * @return JsonResponse
      */
-    public function getTokenUser(UserInterface $user, JWTTokenManagerInterface $JWTManager) {
-        return new JsonResponse(['token' => $JWTManager->create($user)]);
+    public function getTokenUser(UserInterface $user, JWTTokenManagerInterface $JWTManager)
+    {
+        return new JsonResponse([
+            'token' => $JWTManager->create($user)
+        ]);
     }
 
     /**
@@ -83,7 +87,8 @@ class AuthController extends ApiController
 
      * @return array $validate
      */
-    private function validateUser($request) {
+    private function validateUser($request)
+    {
         $validate = array();
         if (empty($request->get("username"))) {
             array_push($validate, array("username" => "A username is required"));
