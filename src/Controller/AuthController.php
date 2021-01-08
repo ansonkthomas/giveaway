@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Utils\FormatData;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,10 +21,10 @@ class AuthController extends ApiController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      */
-    public function register(Request $request, UserPasswordEncoderInterface $encoder)
+    public function register(Request $request, UserPasswordEncoderInterface $encoder, FormatData $formatData)
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $request = UtilityController::transformJsonBody($request);
+        $request = $formatData->transformJsonBody($request);
         $username = $request->get('username');
         $password = $request->get('password');
 
@@ -54,7 +55,7 @@ class AuthController extends ApiController
 
                 //Reset the value of password
                 $user->setPassword("");
-                $data = UtilityController::objctToArrayNormalize($user);
+                $data = $formatData->objectToArrayNormalize($user);
             }
         } catch (\Exception $e) {
             $data = [

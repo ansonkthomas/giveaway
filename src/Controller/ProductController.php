@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Utils\FormatData;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -17,10 +18,10 @@ class ProductController extends ApiController
      *
      * @Route("/products", name="create_product", methods={"POST"})
      */
-    public function createProduct(Request $request)
+    public function createProduct(Request $request, FormatData $formatData)
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $request = UtilityController::transformJsonBody($request);
+        $request = $formatData->transformJsonBody($request);
         try {
             if (!$request) {
                 $this->throwBadRequest();
@@ -39,7 +40,7 @@ class ProductController extends ApiController
                 $product->setType($request->get("type"));
                 $entityManager->persist($product);
                 $entityManager->flush();
-                $data = UtilityController::objctToArrayNormalize($product);
+                $data = $formatData->objectToArrayNormalize($product);
             }
         } catch (\Exception $e) {
             $data = [
@@ -55,7 +56,7 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "show_product", requirements={"number"="\d+"}, methods={"GET"})
      */
-    public function showProduct(int $id)
+    public function showProduct(FormatData $formatData, int $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
         try {
@@ -63,7 +64,7 @@ class ProductController extends ApiController
             if (!$product) {
                 $this->throwResourceNotFound("The product does not exists");
             }
-            $data = UtilityController::objctToArrayNormalize($product);
+            $data = $formatData->objectToArrayNormalize($product);
         } catch (\Exception $e) {
             $data = [
                 "message" => $e->getMessage()
@@ -78,10 +79,10 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"PUT"})
      */
-    public function updateProduct(Request $request, int $id)
+    public function updateProduct(Request $request, FormatData $formatData, int $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $request = UtilityController::transformJsonBody($request);
+        $request = $formatData->transformJsonBody($request);
         try {
             if (!$request) {
                 $this->throwBadRequest();
@@ -103,7 +104,7 @@ class ProductController extends ApiController
                 $product->setName($request->get("name"));
                 $product->setType($request->get("type"));
                 $entityManager->flush();
-                $data = UtilityController::objctToArrayNormalize($product);
+                $data = $formatData->objectToArrayNormalize($product);
             }
         } catch (\Exception $e) {
             $data = [
