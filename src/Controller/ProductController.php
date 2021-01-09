@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Utils\FormatData;
+use App\Utils\Validation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -18,7 +19,7 @@ class ProductController extends ApiController
      *
      * @Route("/products", name="create_product", methods={"POST"})
      */
-    public function createProduct(Request $request, FormatData $formatData)
+    public function createProduct(Request $request, FormatData $formatData, Validation $validation)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $request = $formatData->transformJsonBody($request);
@@ -27,7 +28,7 @@ class ProductController extends ApiController
                 $this->throwBadRequest();
             }
             //Validate the product properties
-            $validate = $this->validateProduct($request);
+            $validate = $validation->validateProduct($request);
             if (count($validate)) {
                 $this->setValidationStatusCode();
                 $data = [
@@ -79,7 +80,7 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"PUT"})
      */
-    public function updateProduct(Request $request, FormatData $formatData, int $id)
+    public function updateProduct(Request $request, FormatData $formatData, Validation $validation, int $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $request = $formatData->transformJsonBody($request);
@@ -93,7 +94,7 @@ class ProductController extends ApiController
             }
 
             //Validate the product properties
-            $validate = $this->validateProduct($request);
+            $validate = $validation->validateProduct($request);
             if (count($validate)) {
                 $this->setValidationStatusCode();
                 $data = [
@@ -140,25 +141,5 @@ class ProductController extends ApiController
         }
 
         return $this->response($data);
-    }
-
-    /**
-     * Validate product parameters
-     *
-     * @param Request $request
-     *
-     * @return array $validate
-     */
-    private function validateProduct($request)
-    {
-        $validate = array();
-        if (empty($request->get("name"))) {
-            array_push($validate, array("name" => "A product name is required"));
-        }
-        if (empty($request->get("type"))) {
-            array_push($validate, array("type" => "A product type is required"));
-        }
-
-        return $validate;
     }
 }

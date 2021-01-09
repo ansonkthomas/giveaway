@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Utils\FormatData;
+use App\Utils\Validation;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +22,7 @@ class AuthController extends ApiController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      */
-    public function register(Request $request, UserPasswordEncoderInterface $encoder, FormatData $formatData)
+    public function register(Request $request, UserPasswordEncoderInterface $encoder, FormatData $formatData, Validation $validation)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $request = $formatData->transformJsonBody($request);
@@ -33,7 +34,7 @@ class AuthController extends ApiController
                 $this->throwBadRequest();
             }
             //Validate the user properties
-            $validate = $this->validateUser($request);
+            $validate = $validation->validateUser($request);
             if (count($validate)) {
                 $this->setValidationStatusCode();
                 $data = [
@@ -79,25 +80,5 @@ class AuthController extends ApiController
         return new JsonResponse([
             'token' => $JWTManager->create($user)
         ]);
-    }
-
-    /**
-     * Validate user parameters
-     *
-     * @param array $request
-
-     * @return array $validate
-     */
-    private function validateUser($request)
-    {
-        $validate = array();
-        if (empty($request->get("username"))) {
-            array_push($validate, array("username" => "A username is required"));
-        }
-        if (empty($request->get("password"))) {
-            array_push($validate, array("password" => "A password is required"));
-        }
-
-        return $validate;
     }
 }
