@@ -1,13 +1,10 @@
 <?php
 
-namespace App\Controller;
+namespace App\Service;
 
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Security\Core\User\UserInterface;
 
-class ApiController extends AbstractController
+class ApiResponse
 {
     /**
      * @var integer HTTP status code - 200 (OK) by default

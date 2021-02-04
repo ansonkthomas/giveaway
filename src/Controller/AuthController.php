@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Utils\FormatData;
 use App\Utils\Validation;
+use App\Service\ApiResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class AuthController extends ApiController
+class AuthController extends AbstractController
 {
     /**
      * Register a user
@@ -22,7 +23,7 @@ class AuthController extends ApiController
      * @param Request $request
      * @param UserPasswordEncoderInterface $encoder
      */
-    public function register(Request $request, UserPasswordEncoderInterface $encoder, FormatData $formatData, Validation $validation)
+    public function register(Request $request, UserPasswordEncoderInterface $encoder, FormatData $formatData, Validation $validation, ApiResponse $apiResponse)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $request = $formatData->transformJsonBody($request);
@@ -31,12 +32,12 @@ class AuthController extends ApiController
 
         try {
             if (!$request) {
-                $this->throwBadRequest();
+                $apiResponse->throwBadRequest();
             }
             //Validate the user properties
             $validate = $validation->validateUser($request);
             if (count($validate)) {
-                $this->setValidationStatusCode();
+                $apiResponse->setValidationStatusCode();
                 $data = [
                     "message" => $validate
                 ];
@@ -50,7 +51,8 @@ class AuthController extends ApiController
                     $entityManager->persist($user);
                     $entityManager->flush();
                 } catch (\Exception $e) {
-                    $this->setValidationStatusCode();
+                    //$this->setValidationStatusCode();
+                    $apiResponse->setValidationStatusCode();
                     throw new \Exception("The username exists");
                 }
 
@@ -64,7 +66,7 @@ class AuthController extends ApiController
             ];
         }
 
-        return $this->response($data);
+        return $apiResponse->response($data);
     }
 
     /**

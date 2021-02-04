@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Utils\FormatData;
 use App\Utils\Validation;
+use App\Service\ApiResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -12,25 +13,25 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
-class ProductController extends ApiController
+class ProductController extends AbstractController
 {
     /**
      * Create a product
      *
      * @Route("/products", name="create_product", methods={"POST"})
      */
-    public function createProduct(Request $request, FormatData $formatData, Validation $validation)
+    public function createProduct(Request $request, FormatData $formatData, Validation $validation, ApiResponse $apiResponse)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $request = $formatData->transformJsonBody($request);
         try {
             if (!$request) {
-                $this->throwBadRequest();
+                $apiResponse->throwBadRequest();
             }
             //Validate the product properties
             $validate = $validation->validateProduct($request);
             if (count($validate)) {
-                $this->setValidationStatusCode();
+                $apiResponse->setValidationStatusCode();
                 $data = [
                     "message" => $validate
                 ];
@@ -49,7 +50,7 @@ class ProductController extends ApiController
             ];
         }
 
-        return $this->response($data);
+        return $apiResponse->response($data);
     }
 
     /**
@@ -57,13 +58,13 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "show_product", requirements={"number"="\d+"}, methods={"GET"})
      */
-    public function showProduct(FormatData $formatData, int $id)
+    public function showProduct(FormatData $formatData, ApiResponse $apiResponse, int $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
         try {
             $product = $entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
-                $this->throwResourceNotFound("The product does not exists");
+                $apiResponse->throwResourceNotFound("The product does not exists");
             }
             $data = $formatData->objectToArrayNormalize($product);
         } catch (\Exception $e) {
@@ -72,7 +73,7 @@ class ProductController extends ApiController
             ];
         }
 
-        return $this->response($data);
+        return $apiResponse->response($data);
     }
 
     /**
@@ -80,23 +81,26 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "update_product", requirements={"number"="\d+"}, methods = {"PUT"})
      */
-    public function updateProduct(Request $request, FormatData $formatData, Validation $validation, int $id)
+    public function updateProduct(Request $request, FormatData $formatData, Validation $validation, ApiResponse $apiResponse, int $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
         $request = $formatData->transformJsonBody($request);
         try {
             if (!$request) {
-                $this->throwBadRequest();
+                //$this->throwBadRequest();
+                $apiResponse->throwBadRequest();
             }
             $product = $entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
-                $this->throwResourceNotFound("The product does not exists");
+                //$this->throwResourceNotFound("The product does not exists");
+                $apiResponse->throwResourceNotFound("The product does not exists");
             }
 
             //Validate the product properties
             $validate = $validation->validateProduct($request);
             if (count($validate)) {
-                $this->setValidationStatusCode();
+                //$this->setValidationStatusCode();
+                $apiResponse->setValidationStatusCode();
                 $data = [
                     "message" => $validate
                 ];
@@ -113,7 +117,8 @@ class ProductController extends ApiController
             ];
         }
 
-        return $this->response($data);
+        //return $this->response($data);
+        return $apiResponse->response($data);
     }
 
     /**
@@ -121,13 +126,14 @@ class ProductController extends ApiController
      *
      * @Route("/products/{id}", name = "delete_product", requirements={"number"="\d+"}, methods = {"DELETE"})
      */
-    public function deleteProduct(int $id)
+    public function deleteProduct(ApiResponse $apiResponse, int $id)
     {
         $entityManager = $this->getDoctrine()->getManager();
         try {
             $product = $entityManager->getRepository(Product::class)->find($id);
             if (!$product) {
-               $this->throwResourceNotFound("The product does not exists");
+               //$this->throwResourceNotFound("The product does not exists");
+               $apiResponse->throwResourceNotFound("The product does not exists");
             }
             $entityManager->remove($product);
             $entityManager->flush();
@@ -140,6 +146,7 @@ class ProductController extends ApiController
             ];
         }
 
-        return $this->response($data);
+        //return $this->response($data);
+        return $apiResponse->response($data);
     }
 }
